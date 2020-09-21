@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home work</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <script src="../assets/js/react.development.js"></script>
+    <script src="../assets/js/react-dom.development.js"></script>
+    <script src="../assets/js/prop-types.js"></script>
+    <script src="../assets/js/babel.js"></script>
+
+    <script type="text/babel">
+      const root = document.getElementById("root");
+
+      const Heading = ({ children, ...rest }) => (
+        <h1 className="display-4 text-center">{children}</h1>
+      );
+      const el = <Heading />;
+      console.log(el);
+
+      Heading.propTypes = {
+        children: PropTypes.node.isRequired,
+      };
+      Heading.defaultProps = {
+        children: <span>Heading</span>,
+      };
+
+      const Searchbar = (props) => {
+        const { filter, update, ...rest } = props;
+        return (
+          <div className="md-form active-pink active-pink-2 mb-3 mt-0">
+            <input
+              className="form-control"
+              type="text"
+              placeholder="Search"
+              aria-label="Search"
+              value={filter}
+              onChange={update}
+            />
+          </div>
+        );
+      };
+      Searchbar.propTypes = {
+        update: PropTypes.func.isRequired,
+        filter: PropTypes.string.isRequired,
+      };
+
+      const UserTable = (props) => {
+        let { users, filter, ...rest } = props;
+
+        const getBody = () => {
+          if (filter) {
+            users = users.filter(({ username }) =>
+              username.toLowerCase().includes(filter.toLowerCase())
+            );
+          }
+          return users.map(({ name, username, email }, index) => {
+            return (
+              <tr key={name}>
+                <th scope="row">{index + 1}</th>
+                <td>{name}</td>
+                <td>{username}</td>
+                <td>{email}</td>
+              </tr>
+            );
+          });
+        };
+
+        return (
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Username</th>
+                <th scope="col">Email</th>
+              </tr>
+            </thead>
+            <tbody>{getBody()}</tbody>
+          </table>
+        );
+      };
+
+      UserTable.propTypes = {
+        users: PropTypes.arrayOf(PropTypes.object).isRequired,
+        filter: PropTypes.string.isRequired,
+      };
+
+      const App = (props) => {
+        const [results, setResults] = React.useState([]);
+        const [filter, setFilter] = React.useState("");
+        const [loading, setLoading] = React.useState(false);
+        const [error, setError] = React.useState(false);
+
+        const update = ({ target }) => {
+          setFilter(target.value);
+        };
+
+        React.useEffect(() => {
+          (async function getResults() {
+            setError(false);
+            setLoading(true);
+            try {
+              const res = await fetch(
+                "https://jsonplaceholder.typicode.com/users"
+              );
+              if (!res.ok) {
+                console.log("Unsuccessfull response");
+                setError(true);
+              }
+              const data = await res.json();
+              console.log(data);
+              setResults(data);
+            } catch (err) {
+              setError(true);
+              console.log(err);
+            } finally {
+              setLoading(false);
+            }
+          })();
+        }, []);
+
+        const getBody = () => {
+          if (loading) return <Heading>Loading...</Heading>;
+          console.log(results);
+          if (error) return <Heading>Something went wrong :(</Heading>;
+          return <UserTable users={results} filter={filter} />;
+        };
+        return (
+          <div className="container ">
+            <Heading>Users</Heading>
+            <Searchbar filter={filter} update={update} />
+            {getBody()}
+          </div>
+        );
+      };
+
+      ReactDOM.render(<App />, root);
+
+      //  Задание
+      //   - вывести список из 10 пользователей с url  https://jsonplaceholder.typicode.com/users
+      //     (name, username, email)
+      //   - обязательно использовать композицию компонентов
+      //   - обязательно валидировать props используя библиотеку prop-types
+      //   - реализовать фильтрацию по имени пользователя
+    </script>
+  </body>
+</html>

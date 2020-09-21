@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>State</title>
+  <link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script src="../assets/js/react.development.js"></script>
+  <script src="../assets/js/react-dom.development.js"></script>
+  <script src="../assets/js/prop-types.js"></script>
+  <script src="../assets/js/babel.js"></script>
+
+  <script type="text/babel">
+    const root = document.getElementById("root");
+
+    const InputMessage = ({ msg, update, ...rest }) => <input value={msg} onChange={update}  {...rest} />
+
+    const Message = ({ children }) => <h1>{children}</h1>
+    const Heart = () => <span>&hearts;</span>
+
+    class App extends React.Component {
+
+      state = { msg: "React" }
+
+      update = ({ target }) => {
+        this.setState({ msg: target.value })
+      }
+
+      render() {
+        const { msg } = this.state;
+        const { greet } = this.props;
+        return (
+          <div className="container">
+            <h1>{greet} {msg}</h1>
+            <Message>I <Heart /> React</Message>
+            <InputMessage msg={msg} update={this.update} />
+          </div>
+        )
+      }
+
+    }
+
+    App.propTypes = {
+      greet: PropTypes.string.isRequired
+    }
+    App.defaultProps = {
+      greet: "Hello"
+    }
+
+
+    ReactDOM.render(<App greet="Hi" />, root);
+  </script>
+</body>
+
+</html>
